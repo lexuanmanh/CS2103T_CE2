@@ -41,14 +41,25 @@ import java.io.*;
 
 public class TextBuddy {
     
+    private final String COMMAND_ADD = "add";
+    private final String COMMAND_DELETE = "delete";
+    private final String COMMAND_DISPLAY = "display";
+    private final String COMMAND_SORT = "sort";
+    private final String COMMAND_SEARCH = "search";
+    private final String COMMAND_CLEAR = "clear";
+    private final String COMMAND_EXIT = "exit";
+    
     private final String MESSAGE_EMPTY = "";
     private final String MESSAGE_WELCOME = "Welcome to TextBuddy. %s is ready for use";
     private final String MESSAGE_COMMAND = "Command";
+    private final String MESSAGE_INVALID_COMMAND = "Invalid command";
+    private final String MESSAGE_TEXT_ADDED = "Added to %s: " + '"' + "%s" + '"';
     
     
     private final FIRST_ELEMENT = 0;
     
     private static String myFileName;
+    private static ArrayList<String> content = new ArrayList<String>();
     
     private final PrinterWrite writer;
     private final Scanner scanner = new Scanner(System.in);
@@ -62,7 +73,41 @@ public class TextBuddy {
         
     }
     
-    public String executeCommand(
+    boolean checkCommandHasWord(String userCommand) {
+        for(int i=0; i<userCommand.size(); i++) {
+            if (userCommand.charAt(i) != ' ') {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public String executeCommand(String userCommand) {
+        
+        if (!checkCommandHasWord) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+        
+        String command = getCommand(userCommand);
+        if (command == COMMAND_ADD) {
+            return addText(userCommand);
+        } else if (command == COMMAND_DISPLAY) {
+            return displayText(userCommand);
+        } else if (command == COMMAND_DELETE) {
+            return deleteText(userCommand);
+        } else if (command == COMMAND_CLEAR) {
+            return clearText(userCommand);
+        } else if (command == COMMAND_SORT) {
+            return sortText(userCommand);
+        } else if (command == COMMAND_SEARCH) {
+            return searchText(userCommand);
+        } else if (command == COMMAND_EXIT) {
+            return exitText(userCommand);
+        } else {
+            return MESSAGE_INVALID_COMMAND;
+        }
+        
+    }
     
     private void manipulateTextFile() {
         displayMessageToUserWithNewLine(MESSAGE_WELCOME, myFileName);
