@@ -45,14 +45,16 @@ public class TextBuddy {
     private final String MESSAGE_WELCOME = "Welcome to TextBuddy. %s is ready for use";
     private final String MESSAGE_COMMAND = "Command";
     
+    
     private final FIRST_ELEMENT = 0;
     
     private static String myFileName;
     
     private final PrinterWrite writer;
+    private final Scanner scanner = new Scanner(System.in);
     
     
-    public static main(String[] argv) {
+    public void main(String[] argv) {
         
         myFileName = argv[FIRST_ELEMENT];
         openFile(myFileName);
@@ -60,14 +62,28 @@ public class TextBuddy {
         
     }
     
+    public String executeCommand(
+    
     private void manipulateTextFile() {
-        displayMessageToUser(MESSAGE_WELCOME, myFileName, MESSAGE_EMPTY);
+        displayMessageToUserWithNewLine(MESSAGE_WELCOME, myFileName);
         while (true) {
             displayMessageToUser(MESSAGE_COMMAND);
             String userCommand = getUserCommand();
             String displayMessage = executeCommand(userCommand);
-            displayMessageToUser(displayMessage);
+            displayMessageToUserWithNewLine(userCommand);
         }
+    }
+    
+    private String getUserCommand() {
+        return scanner.nextLine();
+    }
+    
+    private void displayMessageToUser(String displayMessage) {
+        System.out.print(displayMessage, firstArgument, secondArgument);
+    }
+                                 
+    private void displayMessageToUserWithNewLine(String displayMessage) {
+        System.out.println(displayMessage, firstArgument, secondArgument);
     }
     
     private void openFile(String fileName) {
@@ -76,6 +92,22 @@ public class TextBuddy {
         } catch (FileNotFoundExeption e) {
             System.out.printfln(e.getMessage());
         }
+    }
+    
+    private String getCommand(String userCommand) {
+        
+        String command = userCommand.split(" ")[FIRST_ELEMENT];
+        return command;
+        
+    }
+    
+    private String getCommandArgument(String userCommand) {
+        String commandArgument = "";
+        String command = getCommand(userCommand);
+        for(int i=command.size()+1; i<commandArgument.size(); i++) {
+            commandArgument = commandArgument + command.charAt(i);
+        }
+        return commandArgument;
     }
 
 }
