@@ -54,6 +54,10 @@ public class TextBuddy {
     private final String MESSAGE_COMMAND = "Command";
     private final String MESSAGE_INVALID_COMMAND = "Invalid command";
     private final String MESSAGE_TEXT_ADDED = "Added to %s: " + '"' + "%s" + '"';
+    private final String MESSAGE_FILE_EMPTY = "%s is empty!";
+    private final String MESSAGE_CLEARED = "All content deleted from %s";
+    private final String MESSAGE_DELETED = "Deleted from %s: " + '"' + "%s" + '"';
+    private final String MESSAGE_SORTED = "All content was sorted";
     
     
     private final FIRST_ELEMENT = 0;
@@ -108,6 +112,61 @@ public class TextBuddy {
         }
         
     }
+    
+    // This function is to add text to file
+    private static String addText(String userCommand) {
+        String commandArgument = removeFirstWord(userCommand);
+        content.add(commandArgument);
+        return String.format(MESSAGE_TEXT_ADDED, myFileName, commandArgument);
+    }
+    
+    // This function is to display text in file
+    private String displayText(String userCommand) {
+        String displayMessage = "";
+        for(int i=0; i<content.size(); i++) {
+            displayMessage += (i+1) + ": " + content.get(i) + "\n";
+        }
+        if (content.isEmpty()) {
+            return String.format(MESSAGE_FILE_EMPTY, myFileName);
+        } else {
+            return displayMessage;
+        }
+    }
+    
+    // This function is to delete a text in file
+    private static String deleteText(String userCommand) {
+        String commandArgument = getCommandArgument(userCommand);
+        if (checkCommandHasWord(commandArgument)) {
+            int lineToDelete = Integer.parseInt(commandArgument)-1;
+            String contentDeleted = content.get(lineToDelete);
+            content.remove(lineToDelete);
+            return String.format(MESSAGE_DELETED, myFileName, contentDeleted);
+        }
+        return String.format(MESSAGE_INVALID_COMMAND);
+    }
+    
+    // This function is to clear all content in file
+    private String clearText(String userCommand) {
+        content.clear();
+        return String.format(MESSAGE_CLEARED, myFileName);
+    }
+    
+    // This function is to exit program, write content before exit
+    
+    private void exitText(String userCommand) {
+        for(int i=0; i<content.size(); i++) {
+            writer.printfln(content.get(i));
+        }
+        writer.close();
+        System.exit(0);
+    }
+    
+    //this function is to sort file text
+    private String sortText(String userCommand) {
+        Collections.sort(content);
+        return MESSAGE_SORTED;
+    }
+    
     
     private void manipulateTextFile() {
         displayMessageToUserWithNewLine(MESSAGE_WELCOME, myFileName);
