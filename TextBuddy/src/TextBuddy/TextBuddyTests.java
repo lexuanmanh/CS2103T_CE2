@@ -1,4 +1,3 @@
-package TextBuddy;
 
 import static org.junit.Assert.*;
 

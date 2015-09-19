@@ -1,7 +1,7 @@
-package TextBuddy;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Collections;
 import java.io.*;
 
 /**
@@ -41,35 +41,36 @@ import java.io.*;
 
 public class TextBuddy {
     
-    private final String COMMAND_ADD = "add";
-    private final String COMMAND_DELETE = "delete";
-    private final String COMMAND_DISPLAY = "display";
-    private final String COMMAND_SORT = "sort";
-    private final String COMMAND_SEARCH = "search";
-    private final String COMMAND_CLEAR = "clear";
-    private final String COMMAND_EXIT = "exit";
+    private static String COMMAND_ADD = "add";
+    private static String COMMAND_DELETE = "delete";
+    private static String COMMAND_DISPLAY = "display";
+    private static String COMMAND_SORT = "sort";
+    private static String COMMAND_SEARCH = "search";
+    private static String COMMAND_CLEAR = "clear";
+    private static String COMMAND_EXIT = "exit";
     
-    private final String MESSAGE_EMPTY = "";
-    private final String MESSAGE_WELCOME = "Welcome to TextBuddy. %s is ready for use";
-    private final String MESSAGE_COMMAND = "Command";
-    private final String MESSAGE_INVALID_COMMAND = "Invalid command";
-    private final String MESSAGE_TEXT_ADDED = "Added to %s: " + '"' + "%s" + '"';
-    private final String MESSAGE_FILE_EMPTY = "%s is empty!";
-    private final String MESSAGE_CLEARED = "All content deleted from %s";
-    private final String MESSAGE_DELETED = "Deleted from %s: " + '"' + "%s" + '"';
-    private final String MESSAGE_SORTED = "All content was sorted";
+    private static String MESSAGE_EMPTY = "";
+    private static String MESSAGE_WELCOME = "Welcome to TextBuddy. %s is ready for use";
+    private static String MESSAGE_COMMAND = "Command: ";
+    private static String MESSAGE_INVALID_COMMAND = "Invalid command";
+    private static String MESSAGE_TEXT_ADDED = "Added to %s: " + '"' + "%s" + '"';
+    private static String MESSAGE_FILE_EMPTY = "%s is empty!";
+    private static String MESSAGE_CLEARED = "All content deleted from %s";
+    private static String MESSAGE_DELETED = "Deleted from %s: " + '"' + "%s" + '"';
+    private static String MESSAGE_SORTED = "All content was sorted";
+    private static String MESSAGE_NO_RESULT = "No line contains word %s";
     
     
-    private final FIRST_ELEMENT = 0;
+    private static int FIRST_ELEMENT = 0;
     
     private static String myFileName;
     private static ArrayList<String> content = new ArrayList<String>();
     
-    private final PrinterWrite writer;
-    private final Scanner scanner = new Scanner(System.in);
+    private static PrintWriter printWriter;
+    private static Scanner scanner = new Scanner(System.in);
     
     
-    public void main(String[] argv) {
+    public static void main(String[] argv) {
         
         myFileName = argv[FIRST_ELEMENT];
         openFile(myFileName);
@@ -77,8 +78,9 @@ public class TextBuddy {
         
     }
     
-    boolean checkCommandHasWord(String userCommand) {
-        for(int i=0; i<userCommand.size(); i++) {
+    //check the command that user typed exist any words or not
+    public static boolean checkCommandHasWord(String userCommand) {
+        for(int i=0; i<userCommand.length(); i++) {
             if (userCommand.charAt(i) != ' ') {
                 return true;
             }
@@ -86,42 +88,43 @@ public class TextBuddy {
         return false;
     }
     
-    public String executeCommand(String userCommand) {
+    //execute command that user typed
+    public static String executeCommand(String userCommand) {
         
-        if (!checkCommandHasWord) {
+        if (!checkCommandHasWord(userCommand)) {
             return MESSAGE_INVALID_COMMAND;
         }
         
-        String command = getCommand(userCommand);
-        if (command == COMMAND_ADD) {
+        String command = getCommandType(userCommand);
+        if (command.equals(COMMAND_ADD)) {
             return addText(userCommand);
-        } else if (command == COMMAND_DISPLAY) {
+        } else if (command.equals(COMMAND_DISPLAY)) {
             return displayText(userCommand);
-        } else if (command == COMMAND_DELETE) {
+        } else if (command.equals(COMMAND_DELETE)) {
             return deleteText(userCommand);
-        } else if (command == COMMAND_CLEAR) {
+        } else if (command.equals(COMMAND_CLEAR)) {
             return clearText(userCommand);
-        } else if (command == COMMAND_SORT) {
+        } else if (command.equals(COMMAND_SORT)) {
             return sortText(userCommand);
-        } else if (command == COMMAND_SEARCH) {
+        } else if (command.equals(COMMAND_SEARCH)) {
             return searchText(userCommand);
-        } else if (command == COMMAND_EXIT) {
-            return exitText(userCommand);
+        } else if (command.equals(COMMAND_EXIT)) {
+            exitText(userCommand);
+            return "";
         } else {
             return MESSAGE_INVALID_COMMAND;
         }
-        
     }
     
     // This function is to add text to file
     private static String addText(String userCommand) {
-        String commandArgument = removeFirstWord(userCommand);
+        String commandArgument = getCommandArgument(userCommand);
         content.add(commandArgument);
         return String.format(MESSAGE_TEXT_ADDED, myFileName, commandArgument);
     }
     
     // This function is to display text in file
-    private String displayText(String userCommand) {
+    private static String displayText(String userCommand) {
         String displayMessage = "";
         for(int i=0; i<content.size(); i++) {
             displayMessage += (i+1) + ": " + content.get(i) + "\n";
@@ -142,74 +145,102 @@ public class TextBuddy {
             content.remove(lineToDelete);
             return String.format(MESSAGE_DELETED, myFileName, contentDeleted);
         }
-        return String.format(MESSAGE_INVALID_COMMAND);
+        return MESSAGE_INVALID_COMMAND;
     }
     
     // This function is to clear all content in file
-    private String clearText(String userCommand) {
+    private static String clearText(String userCommand) {
         content.clear();
         return String.format(MESSAGE_CLEARED, myFileName);
     }
     
     // This function is to exit program, write content before exit
-    
-    private void exitText(String userCommand) {
+    private static void exitText(String userCommand) {
         for(int i=0; i<content.size(); i++) {
-            writer.printfln(content.get(i));
+            printWriter.println(content.get(i));
         }
-        writer.close();
+        printWriter.close();
         System.exit(0);
     }
     
     //this function is to sort file text
-    private String sortText(String userCommand) {
+    private static String sortText(String userCommand) {
         Collections.sort(content);
         return MESSAGE_SORTED;
     }
     
+    //this function is used to search a text in file
+    private static String searchText(String userCommand) {
+        String displayMessage = "";
+        String commandArgument = getCommandArgument(userCommand);
+        for(int i=0; i<content.size(); i++) {
+            String textContent = content.get(i);
+            if (textContent.contains(commandArgument)) {
+                displayMessage += (i+1) + ": " + textContent + "\n";
+            }
+        }
+        if (displayMessage.equals("")) {
+            return String.format(MESSAGE_NO_RESULT, commandArgument);
+        }
+        return displayMessage;
+    }
     
-    private void manipulateTextFile() {
-        displayMessageToUserWithNewLine(MESSAGE_WELCOME, myFileName);
+    //manipulate the command that user typed, display message for each command to user.
+    private static void manipulateTextFile() {
+        displayMessageToUserWithNewLine(String.format(MESSAGE_WELCOME, myFileName));
         while (true) {
             displayMessageToUser(MESSAGE_COMMAND);
             String userCommand = getUserCommand();
             String displayMessage = executeCommand(userCommand);
-            displayMessageToUserWithNewLine(userCommand);
+            displayMessageToUserWithNewLine(displayMessage);
         }
     }
     
-    private String getUserCommand() {
+    //get the command from user
+    private static String getUserCommand() {
         return scanner.nextLine();
     }
     
-    private void displayMessageToUser(String displayMessage) {
-        System.out.print(displayMessage, firstArgument, secondArgument);
-    }
-                                 
-    private void displayMessageToUserWithNewLine(String displayMessage) {
-        System.out.println(displayMessage, firstArgument, secondArgument);
+    //display message for user, without new line
+    private static void displayMessageToUser(String displayMessage) {
+        System.out.print(displayMessage);
     }
     
-    private void openFile(String fileName) {
+    //display message for user with new line
+    private static void displayMessageToUserWithNewLine(String displayMessage) {
+        System.out.println(displayMessage);
+    }
+    
+    //open file to manipulate
+    private static void openFile(String fileName) {
         try {
-            writer = new PrinterWrite(fileName);
-        } catch (FileNotFoundExeption e) {
-            System.out.printfln(e.getMessage());
+            printWriter = new PrintWriter(fileName);
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
     
-    private String getCommand(String userCommand) {
+    //get command type that user typed
+    private static String getCommandType(String userCommand) {
         
-        String command = userCommand.split(" ")[FIRST_ELEMENT];
+        String command = "";
+        for(int i=0; i<userCommand.length(); i++) {
+            if (userCommand.charAt(i) == ' ') {
+                break;
+            } else {
+                command += userCommand.charAt(i);
+            }
+        }
         return command;
         
     }
     
-    private String getCommandArgument(String userCommand) {
+    //get argument for command type: add, delete, search,
+    private static String getCommandArgument(String userCommand) {
         String commandArgument = "";
-        String command = getCommand(userCommand);
-        for(int i=command.size()+1; i<commandArgument.size(); i++) {
-            commandArgument = commandArgument + command.charAt(i);
+        String command = getCommandType(userCommand);
+        for(int i=command.length()+1; i<userCommand.length(); i++) {
+            commandArgument = commandArgument + userCommand.charAt(i);
         }
         return commandArgument;
     }
